@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var session = require('express-session');
-var db = require('./mock_db.js');
+// var db = require('./mock_db.js');
 router.use(session({
   secret: 'cstu32-theme-2',
   resave: true,
@@ -52,6 +52,7 @@ router.get('/:key/question', (req, res, next) => {
 
     res.send({payload: payload});
   }
+});
  
 /* GET home page. */
 router.get('/Page1', function(req, res, next) {
