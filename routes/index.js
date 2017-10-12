@@ -53,6 +53,21 @@ router.get('/:key/question', (req, res, next) => {
     res.send({payload: payload});
   }
  
+/* GET home page. */
+router.get('/Page1', function(req, res, next) {
+  res.render('Game1.ejs');
+});
+
+router.get('/Page2', function(req, res, next) {
+  res.render('Game2.ejs');
+});
+
+router.get('/Page3', function(req, res, next) {
+  res.render('Game3.ejs');
+});
+
+router.get('/Page4', function(req, res, next) {
+  res.render('Game4.ejs');
 });
 
 router.post('/:key/question', (req, res, next) => {
