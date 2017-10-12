@@ -16,7 +16,11 @@ var imageAuth = (req, res, next) => {
 };
 
 router.get('/', (req, res, next) => {
-  res.send('/ page');
+  res.render('Game1.ejs');
+});
+
+router.get('/login', (req, res, next) => {
+  res.render('Game2.ejs');
 });
 
 router.post('/login', (req, res, next) => {
@@ -47,11 +51,13 @@ router.get('/:key/question', (req, res, next) => {
     res.redirect('/'+req.session.key+'/question');
   } else {
     var payload = {
+      key: req.session.key,
       question: req.session.question
     }
 
-    res.send({payload: payload});
+    res.render('Game3.ejs', {payload: payload});
   }
+});
  
 /* GET home page. */
 router.get('/Page1', function(req, res, next) {
@@ -94,10 +100,10 @@ router.post('/:key/question', (req, res, next) => {
 
 router.get('/:key/image', imageAuth, (req, res, next) => {
   var key = req.params.key;
-  if(key !== req.session.key) 
+  if(key != req.session.key) 
     res.redirect('/'+req.session.key+'/image');
   else
-    res.send({image: req.session.image});
+    res.render('Game4.ejs', {image: req.session.image});
 });
 
 
