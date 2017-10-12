@@ -8,11 +8,11 @@ router.use(session({
   saveUninitialized: true
 }));
 
-var auth = (req, res, next) => {
-  if(req.session.user)
+var imageAuth = (req, res, next) => {
+  if(req.session.status)
     return next();
   else
-    return res.redirect('/');
+    return res.redirect('/'+req.session.key+'/question');
 };
 
 router.get('/', (req, res, next) => {
@@ -41,23 +41,34 @@ router.post('/login', (req, res, next) => {
 });
 
 router.get('/:key/question', (req, res, next) => {
-  var payload = {
-    question: req.session.question
+  var key = req.params.key;
+  
+  if(key !== req.session.key) {
+    res.redirect('/'+req.session.key+'/question');
+  } else {
+    var payload = {
+      question: req.session.question
+    }
+
+    res.send({payload: payload});
   }
-  res.send({payload: payload});
+ 
 });
 
 router.post('/:key/question', (req, res, next) => {
   var answer = req.body.answer;
   var key = req.params.key;
-
-  if(answer === req.session.answer) {
+  if(key !== req.session.key) {
+    res.redirect('/'+req.session.key+'/question');
+  } else if(answer === req.session.answer) {
 
     db.updateStatusByKey(key, err => {
       if(err)
         res.send({error: true, msg: 'got some err from server please contact admin.'});
-      else 
-        res.send({correct: true});
+      else {
+        req.session.status = true;
+        res.send({correct: true});        
+      }
     });
 
   }
@@ -66,8 +77,12 @@ router.post('/:key/question', (req, res, next) => {
     
 });
 
-router.get('/:key/image', (req, res, next) => {
-  res.send({image: req.session.image});
+router.get('/:key/image', imageAuth, (req, res, next) => {
+  var key = req.params.key;
+  if(key !== req.session.key) 
+    res.redirect('/'+req.session.key+'/image');
+  else
+    res.send({image: req.session.image});
 });
 
 
