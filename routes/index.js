@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var session = require('express-session');
-// var db = require('./mock_db.js');
+var db = require('./mock_db.js');
 router.use(session({
   secret: 'cstu32-theme-2',
   resave: true,
@@ -26,7 +26,8 @@ router.get('/login', (req, res, next) => {
 router.post('/login', (req, res, next) => {
   console.log(req.body);
   var key = req.body.key;
-
+  key = key.trim().toLocaleLowerCase();
+   
   db.getPayloadByKey(key, (err, payload) => {
     if(err)
       res.send({success: false});
@@ -38,7 +39,8 @@ router.post('/login', (req, res, next) => {
       req.session.answer = payload.answer;
       req.session.status = payload.status;
       req.session.image = payload.image;
-      res.send({success: true, key: payload.key});      
+      req.session.index = payload.index;
+      res.send({success: true, key: payload.key , status : payload.status});      
     }
   });
 
@@ -46,7 +48,7 @@ router.post('/login', (req, res, next) => {
 
 router.get('/:key/question', (req, res, next) => {
   var key = req.params.key;
-  
+
   if(key !== req.session.key) {
     res.redirect('/'+req.session.key+'/question');
   } else {
@@ -79,11 +81,13 @@ router.get('/Page4', function(req, res, next) {
 router.post('/:key/question', (req, res, next) => {
   var answer = req.body.answer;
   var key = req.params.key;
+  key = key.trim().toLocaleLowerCase();
+
   if(key !== req.session.key) {
     res.redirect('/'+req.session.key+'/question');
   } else if(answer === req.session.answer) {
 
-    db.updateStatusByKey(key, err => {
+    db.updateStatusByKey(req.session.index, err => {
       if(err)
         res.send({error: true, msg: 'got some err from server please contact admin.'});
       else {
