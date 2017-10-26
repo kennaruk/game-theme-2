@@ -2,6 +2,22 @@ var express = require('express');
 var router = express.Router();
 var session = require('express-session');
 var db = require('./mock_db.js');
+const answers = ["โรงศพ", "มากาลอง", "แผนที่", "grape", "28", "แตงโม", "หล่อ"];
+const YEAR_INDEX = 0,
+ID_INDEX = 1,
+NAME_INDEX = 2,
+NICKNAME_INDEX = 3,
+SIZE_INDEX = 4,
+ALLERGIC_INDEX = 5,
+CODE_INDEX = 6,
+PAYMENT_INDEX = 7,
+SHIRT_INDEX = 8,
+GROUP_INDEX = 9,
+CAR_INDEX = 10,
+QUESTION_INDEX = 11,
+QUESTION_STATUS = 12,
+ROW_INDEX = 13;
+
 router.use(session({
   secret: 'cstu32-theme-2',
   resave: true,
@@ -9,12 +25,18 @@ router.use(session({
 }));
 
 var imageAuth = (req, res, next) => {
-  if(req.session.status)
+  if(req.session.status === "ถูก")
     return next();
   else
-    return res.redirect('/'+req.session.key+'/question');
+    return res.redirect('/question');
 };
 
+var auth = (req, res, next) => {
+  if(req.session.user)
+    return next();
+  else
+    res.redirect('/');
+}
 router.get('/', (req, res, next) => {
   res.render('Game1.ejs');
 });
@@ -28,37 +50,53 @@ router.post('/login', (req, res, next) => {
   var key = req.body.key;
   key = key.trim().toLocaleLowerCase();
    
-  db.getPayloadByKey(key, (err, payload) => {
+  db.getPayloadByKey(key, (err, row) => {
     if(err)
       res.send({success: false});
     else {
-      console.log('payload: ', payload);
+      // console.log('payload: ', payload);
       req.session.user = true;
-      req.session.key = payload.key;
-      req.session.question = payload.question;
-      req.session.answer = payload.answer;
-      req.session.status = payload.status;
-      req.session.image = payload.image;
-      req.session.index = payload.index;
-      res.send({success: true, key: payload.key , status : payload.status});      
+      req.session.key = row[ID_INDEX];
+      req.session.question = parseInt(row[QUESTION_INDEX]);
+      req.session.nickname = row[NICKNAME_INDEX];
+      req.session.answer = answers[parseInt(row[QUESTION_INDEX])-1];
+      req.session.status = row[QUESTION_STATUS];
+      req.session.index = row[ROW_INDEX];
+      console.log(req.session);
+      res.send({success: true, nickname: req.session.nickname, status: (req.session.status === "ถูก")});      
     }
   });
 
 });
 
-router.get('/:key/question', (req, res, next) => {
-  var key = req.params.key;
+router.get('/question', (req, res, next) => {
 
-  if(key !== req.session.key) {
-    res.redirect('/'+req.session.key+'/question');
-  } else {
-    var payload = {
-      key: req.session.key,
-      question: req.session.question
+    switch(req.session.question) {
+      case 1:
+        res.render('questions/question-1.ejs');
+        break;
+      case 2:
+        res.render('questions/question-2.ejs');
+        break;  
+      case 3:
+        res.render('questions/question-3.ejs');
+        break;
+      case 4:
+        res.render('questions/question-4.ejs');
+        break;  
+      case 5:
+        res.render('questions/question-5.ejs');
+        break;
+      case 6:
+        res.render('questions/question-6.ejs');
+        break;  
+      case 7:
+        res.render('questions/question-7.ejs');
+        break;
+      default:
+        res.redirect('/');
     }
 
-    res.render('Game3.ejs', {payload: payload});
-  }
 });
  
 /* GET home page. */
@@ -78,20 +116,17 @@ router.get('/Page4', function(req, res, next) {
   res.render('Game4.ejs');
 });
 
-router.post('/:key/question', (req, res, next) => {
+router.post('/question', (req, res, next) => {
   var answer = req.body.answer;
-  var key = req.params.key;
-  key = key.trim().toLocaleLowerCase();
-
-  if(key !== req.session.key) {
-    res.redirect('/'+req.session.key+'/question');
-  } else if(answer === req.session.answer) {
-
+  console.log('answer: ', answer);
+  console.log('sesans: ', req.body.answer.trim().toLocaleLowerCase());
+  if(answer === req.session.answer.trim().toLocaleLowerCase()) {
+    
     db.updateStatusByKey(req.session.index, err => {
       if(err)
         res.send({error: true, msg: 'got some err from server please contact admin.'});
       else {
-        req.session.status = true;
+        req.session.status = "ถูก";
         res.send({correct: true});        
       }
     });
@@ -102,12 +137,9 @@ router.post('/:key/question', (req, res, next) => {
     
 });
 
-router.get('/:key/image', imageAuth, (req, res, next) => {
-  var key = req.params.key;
-  if(key != req.session.key) 
-    res.redirect('/'+req.session.key+'/image');
-  else
-    res.render('Game4.ejs', {image: req.session.image});
+router.get('/image', imageAuth, (req, res, next) => {
+    res.render('Game4.ejs');
+    // res.send({wow: true});
 });
 
 
