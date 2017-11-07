@@ -46,7 +46,6 @@ router.get('/login', (req, res, next) => {
 });
 
 router.post('/login', (req, res, next) => {
-  console.log(req.body);
   var key = req.body.key;
   key = key.trim().toLocaleLowerCase();
    
@@ -54,7 +53,6 @@ router.post('/login', (req, res, next) => {
     if(err)
       res.send({success: false});
     else {
-      // console.log('payload: ', payload);
       req.session.user = true;
       req.session.key = row[ID_INDEX];
       req.session.question = parseInt(row[QUESTION_INDEX]);
@@ -62,7 +60,6 @@ router.post('/login', (req, res, next) => {
       req.session.answer = answers[parseInt(row[QUESTION_INDEX])-1];
       req.session.status = row[QUESTION_STATUS];
       req.session.index = row[ROW_INDEX];
-      console.log(req.session);
       res.send({success: true, nickname: req.session.nickname, status: (req.session.status === "ถูก")});      
     }
   });
@@ -118,8 +115,6 @@ router.get('/Page4', function(req, res, next) {
 
 router.post('/question', (req, res, next) => {
   var answer = req.body.answer;
-  console.log('answer: ', answer);
-  console.log('sesans: ', req.body.answer.trim().toLocaleLowerCase());
   if(answer === req.session.answer.trim().toLocaleLowerCase()) {
     
     db.updateStatusByKey(req.session.index, err => {
@@ -139,7 +134,6 @@ router.post('/question', (req, res, next) => {
 
 router.get('/image', imageAuth, (req, res, next) => {
     res.render('Game4.ejs', {index: req.session.question});
-    // res.send({wow: true});
 });
 
 
