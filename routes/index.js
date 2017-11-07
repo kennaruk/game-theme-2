@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var session = require('express-session');
 var db = require('./mock_db.js');
-const answers = ["โรงศพ", "มากาลอง", "แผนที่", "grape", "28", "แตงโม", "หล่อ"];
+const answers = ["โลงศพ", "มากาลอง", "แผนที่", "grape", "28", "แตงโม", "หล่อ"];
 const YEAR_INDEX = 0,
 ID_INDEX = 1,
 NAME_INDEX = 2,
@@ -138,7 +138,7 @@ router.post('/question', (req, res, next) => {
 });
 
 router.get('/image', imageAuth, (req, res, next) => {
-    res.render('Game4.ejs');
+    res.render('Game4.ejs', {index: req.session.question});
     // res.send({wow: true});
 });
 
